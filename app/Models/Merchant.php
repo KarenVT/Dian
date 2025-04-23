@@ -52,4 +52,24 @@ class Merchant extends Model
     {
         return $this->hasMany(User::class);
     }
+    
+    /**
+     * Relación con los productos de este comercio.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+    
+    /**
+     * Relación con las facturas de este comercio.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 } 
