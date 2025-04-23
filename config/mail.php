@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Mail Queue
+    |--------------------------------------------------------------------------
+    |
+    | Esta configuración permite establecer la cola predeterminada para el envío
+    | de correos electrónicos. Se puede configurar a través de la variable 
+    | MAIL_QUEUE en el archivo .env.
+    |
+    */
+
+    'queue' => env('MAIL_QUEUE', 'mail'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mailer Configurations
     |--------------------------------------------------------------------------
     |

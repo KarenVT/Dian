@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +14,36 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Ejecutar el seeder de roles y permisos
+        $this->call(RoleAndPermissionSeeder::class);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Crear usuarios por defecto
+        $admin = User::create([
+            'name' => 'Administrador',
+            'email' => 'admin@ejemplo.com',
+            'password' => Hash::make('password'),
+        ]);
+        $admin->assignRole('admin');
+
+        $cajero = User::create([
+            'name' => 'Cajero',
+            'email' => 'cajero@ejemplo.com',
+            'password' => Hash::make('password'),
+        ]);
+        $cajero->assignRole('cajero');
+
+        $contador = User::create([
+            'name' => 'Contador',
+            'email' => 'contador@ejemplo.com',
+            'password' => Hash::make('password'),
+        ]);
+        $contador->assignRole('contador');
+
+        $cliente = User::create([
+            'name' => 'Cliente',
+            'email' => 'cliente@ejemplo.com',
+            'password' => Hash::make('password'),
+        ]);
+        $cliente->assignRole('cliente');
     }
 }

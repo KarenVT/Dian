@@ -33,6 +33,12 @@ class Invoice extends Model
         'issued_at',
         'due_date',
         'notes',
+        'dian_status',
+        'dian_response_code',
+        'dian_response_message',
+        'dian_retry_count',
+        'dian_sent_at',
+        'dian_processed_at',
     ];
 
     /**
@@ -46,6 +52,9 @@ class Invoice extends Model
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
+        'dian_retry_count' => 'integer',
+        'dian_sent_at' => 'datetime',
+        'dian_processed_at' => 'datetime',
     ];
 
     /**
@@ -67,5 +76,45 @@ class Invoice extends Model
     public static function determineDocumentType(float $total): string
     {
         return $total >= 212000 ? 'invoice' : 'ticket_pos';
+    }
+    
+    /**
+     * Verifica si la factura ha sido aceptada por la DIAN.
+     *
+     * @return bool
+     */
+    public function isAcceptedByDian(): bool
+    {
+        return $this->dian_status === 'ACCEPTED';
+    }
+    
+    /**
+     * Verifica si la factura ha sido rechazada por la DIAN.
+     *
+     * @return bool
+     */
+    public function isRejectedByDian(): bool
+    {
+        return $this->dian_status === 'REJECTED';
+    }
+    
+    /**
+     * Verifica si la factura está pendiente de envío a la DIAN.
+     *
+     * @return bool
+     */
+    public function isPendingDian(): bool
+    {
+        return $this->dian_status === 'PENDING';
+    }
+    
+    /**
+     * Verifica si la factura ha sido enviada a la DIAN y está en espera de respuesta.
+     *
+     * @return bool
+     */
+    public function isSentToDian(): bool
+    {
+        return $this->dian_status === 'SENT';
     }
 } 

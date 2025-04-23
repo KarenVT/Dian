@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\MerchantController;
 use App\Http\Controllers\API\ProductController;
@@ -18,28 +19,47 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Rutas de autenticación
+Route::post('/auth/token', [AuthController::class, 'token']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
 
-// Rutas para merchants
+// Rutas públicas
 Route::post('/merchants', [MerchantController::class, 'store']);
-Route::get('/merchants/{merchant}', [MerchantController::class, 'show'])->middleware('auth:sanctum');
-Route::put('/merchants/{merchant}', [MerchantController::class, 'update'])->middleware('auth:sanctum');
 
-// Rutas para facturas
+// Rutas protegidas por Sanctum y habilidades
 Route::middleware('auth:sanctum')->group(function () {
-    // Ruta para descargar el PDF de una factura
-    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf']);
+    // Rutas de Merchants
+    Route::get('/merchants/{merchant}', [MerchantController::class, 'show'])
+        ->middleware('ability:view_invoice,manage_merchants');
+    Route::put('/merchants/{merchant}', [MerchantController::class, 'update'])
+        ->middleware('ability:manage_merchants');
     
-    // Otras rutas de facturas (implementación futura)
-    Route::get('/invoices', [InvoiceController::class, 'index']);
-    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show']);
+    // Rutas para facturas
+    Route::get('/invoices', [InvoiceController::class, 'index'])
+        ->middleware('ability:view_invoice,view_invoice_own');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])
+        ->middleware('ability:view_invoice,view_invoice_own');
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])
+        ->middleware('ability:view_invoice,view_invoice_own');
     
     // Rutas para productos
-    Route::apiResource('products', ProductController::class);
-    Route::post('/products/import', [ProductController::class, 'import']);
+    Route::apiResource('products', ProductController::class)
+        ->middleware('ability:sell,manage_products');
+    Route::post('/products/import', [ProductController::class, 'import'])
+        ->middleware('ability:manage_products');
     
     // Rutas para reportes
-    Route::get('/reports/sales', [ReportController::class, 'sales']);
+    Route::get('/reports/sales', [ReportController::class, 'sales'])
+        ->middleware('ability:report');
+    
+    // Ejemplo comentado de cómo aplicar el middleware en otra ruta
+    // Route::get('/example', [ExampleController::class, 'index'])
+    //    ->middleware('ability:sell');
 });

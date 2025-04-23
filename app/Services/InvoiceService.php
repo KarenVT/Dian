@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\CartDTO;
 use App\DTOs\CustomerDTO;
+use App\Events\TicketPosCreated;
 use App\Models\Invoice;
 use App\Models\Merchant;
 use Carbon\Carbon;
@@ -110,7 +111,7 @@ class InvoiceService
             );
             
             // Guardar la factura en la base de datos usando transacción
-            return DB::transaction(function () use ($cart, $customer, $invoiceNumber, $documentType, $cufe, $xmlPath, $pdfPath, $signedXmlPath, $issuedAt) {
+            $invoice = DB::transaction(function () use ($cart, $customer, $invoiceNumber, $documentType, $cufe, $xmlPath, $pdfPath, $signedXmlPath, $issuedAt) {
                 return Invoice::create([
                     'merchant_id' => $this->merchant->id,
                     'invoice_number' => $invoiceNumber,
@@ -131,6 +132,13 @@ class InvoiceService
                     'notes' => $cart->notes,
                 ]);
             });
+            
+            // Si es un ticket POS, disparar el evento correspondiente
+            if ($documentType === 'ticket_pos') {
+                event(new TicketPosCreated($invoice));
+            }
+            
+            return $invoice;
         } catch (Exception $e) {
             // Limpiar archivos temporales en caso de error
             $this->cleanupTempFiles();

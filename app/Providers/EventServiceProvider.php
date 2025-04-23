@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\InvoiceAccepted;
+use App\Events\TicketPosCreated;
+use App\Listeners\SendInvoiceAcceptedNotification;
+use App\Listeners\SendTicketPosCreatedNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +21,12 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        InvoiceAccepted::class => [
+            SendInvoiceAcceptedNotification::class,
+        ],
+        TicketPosCreated::class => [
+            SendTicketPosCreatedNotification::class,
         ],
     ];
 
