@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Events\InvoiceAccepted;
 use App\Models\Invoice;
+use App\Services\DianApiService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Bus\Queueable;
@@ -14,10 +15,11 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Bus\Batchable;
 
 class SendInvoiceToDian implements ShouldQueue, ShouldBeUnique
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Array con los tiempos de espera (en minutos) para reintentos.
@@ -61,12 +63,23 @@ class SendInvoiceToDian implements ShouldQueue, ShouldBeUnique
     /**
      * Execute the job.
      */
-    public function handle(): void
+    public function handle(DianApiService $dianApiService): void
     {
         if (!$this->invoice->signed_xml_path) {
             Log::error('No se puede enviar la factura a DIAN porque no tiene XML firmado', [
                 'invoice_id' => $this->invoice->id,
                 'invoice_number' => $this->invoice->invoice_number
+            ]);
+            return;
+        }
+
+        // Verificar si la factura puede ser enviada a DIAN
+        if (!$this->invoice->canBeSentToDian()) {
+            Log::warning('La factura no puede ser enviada a DIAN', [
+                'invoice_id' => $this->invoice->id,
+                'invoice_number' => $this->invoice->invoice_number,
+                'retry_count' => $this->invoice->dian_retry_count,
+                'status' => $this->invoice->dian_status
             ]);
             return;
         }
@@ -77,37 +90,40 @@ class SendInvoiceToDian implements ShouldQueue, ShouldBeUnique
         ]);
 
         try {
-            // Marcar como enviada
-            $this->invoice->update([
-                'dian_status' => 'SENT',
-                'dian_sent_at' => now(),
-            ]);
-
-            // Obtener el contenido del XML firmado
-            $xmlContent = Storage::get($this->invoice->signed_xml_path);
-            if (!$xmlContent) {
-                throw new \Exception('No se pudo leer el archivo XML firmado');
+            // Enviar factura a DIAN usando el servicio
+            $result = $dianApiService->sendInvoice($this->invoice);
+            
+            if (!$result['success']) {
+                // Si falló, lanzar excepción para reintento
+                throw new \Exception($result['message'] ?? 'Error al enviar la factura a DIAN');
             }
-
-            // Mock de la llamada a la API de la DIAN (simulación)
-            $response = $this->mockDianApiCall($xmlContent);
-
-            // Procesar la respuesta
-            $this->processResponse($response);
+            
+            // Si hay trackId, verificar el estado después de unos segundos
+            if (isset($result['trackId']) && !empty($result['trackId'])) {
+                // Esperar unos segundos para que DIAN procese la factura
+                sleep(5);
+                
+                // Consultar estado
+                $statusResult = $dianApiService->checkInvoiceStatus($this->invoice);
+                
+                // Registrar resultado
+                Log::info('Estado de factura en DIAN consultado', [
+                    'invoice_id' => $this->invoice->id,
+                    'status' => $statusResult['status'] ?? 'unknown',
+                    'message' => $statusResult['statusDescription'] ?? ''
+                ]);
+                
+                // Si fue aceptada, disparar evento
+                if ($this->invoice->isAcceptedByDian()) {
+                    event(new InvoiceAccepted($this->invoice));
+                }
+            }
 
         } catch (\Exception $e) {
             Log::error('Error al enviar factura a DIAN', [
                 'invoice_id' => $this->invoice->id,
                 'error' => $e->getMessage(),
                 'retry_count' => $this->invoice->dian_retry_count
-            ]);
-
-            // Actualizar el estado de la factura a REJECTED para posteriores reintentos
-            $this->invoice->update([
-                'dian_status' => 'REJECTED',
-                'dian_response_code' => 'ERROR',
-                'dian_response_message' => $e->getMessage(),
-                'dian_processed_at' => now(),
             ]);
 
             // Si hemos alcanzado el máximo de reintentos, fallar definitivamente
@@ -121,12 +137,13 @@ class SendInvoiceToDian implements ShouldQueue, ShouldBeUnique
             }
 
             // Incrementar el contador de reintentos
-            $this->invoice->increment('dian_retry_count');
+            $this->invoice->incrementDianRetryCount();
             
             // Lanzar la excepción para que Laravel reintente el trabajo
             throw $e;
         }
     }
+}
 
     /**
      * Simulación de llamada a la API de la DIAN (entorno de habilitación)

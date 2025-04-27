@@ -78,19 +78,25 @@
         @if($invoice->document_type === 'invoice')
         <p>Si lo desea, puede descargar su factura directamente desde nuestro portal haciendo clic en el siguiente botón:</p>
         <p style="text-align: center;">
-            <a href="{{ config('app.url') }}/api/invoices/{{ $invoice->id }}/pdf" class="btn btn-primary">Descargar Factura</a>
+            <a href="{{ url("/facturas/{$invoice->access_token}") }}" class="btn btn-primary">Consultar Factura</a>
+        </p>
+        <p style="text-align: center; margin-top: 10px;">
+            <a href="{{ url("/facturas/{$invoice->access_token}/pdf") }}" class="btn">Descargar PDF</a>
+        </p>
+        <p style="font-size: 12px; color: #666; text-align: center; margin-top: 10px;">
+            No es necesario iniciar sesión. Este enlace es de acceso único para su factura.
         </p>
         @endif
         
         <p>Gracias por su preferencia.</p>
         
         <p>Atentamente,</p>
-        <p>{{ $invoice->merchant->business_name }}</p>
+        <p>{{ $invoice->company->business_name }}</p>
     </div>
 
     <div class="footer">
         <p>Este es un correo electrónico automático, por favor no responda a este mensaje.</p>
-        <p>&copy; {{ date('Y') }} {{ $invoice->merchant->business_name }}. Todos los derechos reservados.</p>
+        <p>&copy; {{ date('Y') }} {{ $invoice->company->business_name }}. Todos los derechos reservados.</p>
     </div>
 </body>
 </html> 

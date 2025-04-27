@@ -11,19 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('product_price_history', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('merchant_id')->constrained()->onDelete('cascade');
-            $table->string('sku');
-            $table->string('name');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->decimal('price', 15, 2);
             $table->decimal('tax_rate', 5, 2);
-            $table->string('dian_code')->nullable();
             $table->timestamps();
-            $table->softDeletes();
-            
-            // SKU debe ser único por merchant
-            $table->unique(['merchant_id', 'sku']);
         });
     }
 
@@ -32,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('product_price_history');
     }
-};
+}; 

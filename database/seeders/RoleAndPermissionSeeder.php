@@ -21,27 +21,33 @@ class RoleAndPermissionSeeder extends Seeder
             'view_invoice',
             'view_invoice_own',
             'sell',
-            'report',
-            'manage_users',
             'manage_products',
-            'manage_merchants',
+            'view_reports_basic',
+            'manage_users',
+            'manage_roles',
+            'manage_companies',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
         // Crear roles y asignar permisos
-        $adminRole = Role::create(['name' => 'admin']);
+        // 1. Admin - acceso total
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->givePermissionTo(Permission::all());
 
-        $cajeroRole = Role::create(['name' => 'cajero']);
-        $cajeroRole->givePermissionTo(['sell', 'view_invoice']);
+        // 2. Comerciante - abilities: sell, view_invoice, manage_products, view_reports_basic
+        $comercianteRole = Role::firstOrCreate(['name' => 'comerciante']);
+        $comercianteRole->syncPermissions([
+            'sell', 
+            'view_invoice', 
+            'manage_products', 
+            'view_reports_basic'
+        ]);
 
-        $contadorRole = Role::create(['name' => 'contador']);
-        $contadorRole->givePermissionTo(['view_invoice', 'report']);
-
-        $clienteRole = Role::create(['name' => 'cliente']);
-        $clienteRole->givePermissionTo(['view_invoice_own']);
+        // 3. Cliente - ability limitado: view_invoice_own
+        $clienteRole = Role::firstOrCreate(['name' => 'cliente']);
+        $clienteRole->syncPermissions(['view_invoice_own']);
     }
 } 

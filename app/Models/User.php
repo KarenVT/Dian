@@ -23,7 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'merchant_id',
+        'company_id',
     ];
 
     /**
@@ -47,12 +47,22 @@ class User extends Authenticatable
     ];
     
     /**
-     * Obtiene el comercio al que pertenece el usuario.
+     * Obtiene la empresa a la que pertenece el usuario.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function merchant(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Merchant::class);
+        return $this->belongsTo(Company::class);
+    }
+    
+    /**
+     * Alias para mantener compatibilidad con código existente.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function getCompany(): BelongsTo
+    {
+        return $this->company();
     }
 }

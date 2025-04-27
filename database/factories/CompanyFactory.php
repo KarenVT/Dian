@@ -2,22 +2,22 @@
 
 namespace Database\Factories;
 
-use App\Models\Merchant;
+use App\Models\company;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Merchant>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\company>
  */
-class MerchantFactory extends Factory
+class companyFactory extends Factory
 {
     /**
      * El modelo al que corresponde este factory.
      *
      * @var string
      */
-    protected $model = Merchant::class;
+    protected $model = company::class;
 
     /**
      * Define el estado por defecto del modelo.

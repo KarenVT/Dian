@@ -62,24 +62,24 @@ class DianCleanupCommand extends Command
         $this->info(sprintf('Se encontraron %d documentos con antigüedad mayor a 5 años.', count($expiredDocuments)));
         
         // Agrupar documentos por NIT de comercio
-        $documentsByMerchant = [];
+        $documentsBycompany = [];
         foreach ($expiredDocuments as $document) {
-            $merchantNit = $document['merchantNit'];
-            if (!isset($documentsByMerchant[$merchantNit])) {
-                $documentsByMerchant[$merchantNit] = [];
+            $companyNit = $document['companyNit'];
+            if (!isset($documentsBycompany[$companyNit])) {
+                $documentsBycompany[$companyNit] = [];
             }
-            $documentsByMerchant[$merchantNit][] = $document;
+            $documentsBycompany[$companyNit][] = $document;
         }
         
         // Mostrar resumen por comercio
-        foreach ($documentsByMerchant as $merchantNit => $documents) {
-            $this->info(sprintf('Comercio NIT %s: %d documentos', $merchantNit, count($documents)));
+        foreach ($documentsBycompany as $companyNit => $documents) {
+            $this->info(sprintf('Comercio NIT %s: %d documentos', $companyNit, count($documents)));
         }
         
         // Notificar antes de eliminar
         $notifyEmail = $this->option('notify');
         if ($notifyEmail) {
-            $this->notifyExpiredDocuments($notifyEmail, $documentsByMerchant);
+            $this->notifyExpiredDocuments($notifyEmail, $documentsBycompany);
             $this->info(sprintf('Se ha notificado al correo %s sobre los documentos a eliminar.', $notifyEmail));
         }
         
@@ -109,7 +109,7 @@ class DianCleanupCommand extends Command
                     Log::info(sprintf(
                         'Documento eliminado por antigüedad: %s (NIT: %s, Año: %s, Mes: %s)',
                         $document['path'],
-                        $document['merchantNit'],
+                        $document['companyNit'],
                         $document['year'],
                         $document['month']
                     ));
@@ -130,17 +130,17 @@ class DianCleanupCommand extends Command
      * Notifica por correo sobre los documentos a eliminar
      * 
      * @param string $email Correo electrónico destino
-     * @param array $documentsByMerchant Documentos agrupados por comercio
+     * @param array $documentsBycompany Documentos agrupados por comercio
      * @return void
      */
-    private function notifyExpiredDocuments(string $email, array $documentsByMerchant): void
+    private function notifyExpiredDocuments(string $email, array $documentsBycompany): void
     {
         // En un entorno real, aquí se enviaría un correo usando una clase de Mailable
         // Para fines de demostración, lo simulamos con un log
         
         $summary = [];
-        foreach ($documentsByMerchant as $merchantNit => $documents) {
-            $summary[] = sprintf('- NIT %s: %d documentos', $merchantNit, count($documents));
+        foreach ($documentsBycompany as $companyNit => $documents) {
+            $summary[] = sprintf('- NIT %s: %d documentos', $companyNit, count($documents));
         }
         
         $message = sprintf(

@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\DTOs\CartDTO;
 use App\DTOs\CustomerDTO;
 use App\Models\Invoice;
-use App\Models\Merchant;
+use App\Models\company;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -16,9 +16,9 @@ class InvoiceServiceTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @var Merchant
+     * @var company
      */
-    protected $merchant;
+    protected $company;
 
     /**
      * @var InvoiceService
@@ -36,7 +36,7 @@ class InvoiceServiceTest extends TestCase
         Storage::fake('local');
 
         // Crear un comercio de prueba
-        $this->merchant = Merchant::factory()->create([
+        $this->company = company::factory()->create([
             'nit' => '900123456',
             'business_name' => 'Empresa de Prueba S.A.S',
             'email' => 'contacto@empresaprueba.com',
@@ -46,7 +46,7 @@ class InvoiceServiceTest extends TestCase
         ]);
 
         // Instanciar el servicio
-        $this->invoiceService = new InvoiceService($this->merchant);
+        $this->invoiceService = new InvoiceService($this->company);
     }
 
     /**
@@ -96,7 +96,7 @@ class InvoiceServiceTest extends TestCase
 
         // Verificar
         $this->assertInstanceOf(Invoice::class, $invoice);
-        $this->assertEquals($this->merchant->id, $invoice->merchant_id);
+        $this->assertEquals($this->company->id, $invoice->company_id);
         $this->assertEquals('invoice', $invoice->document_type); // Debe ser factura formal
         $this->assertEquals($subtotal, $invoice->subtotal);
         $this->assertEquals($tax, $invoice->tax);

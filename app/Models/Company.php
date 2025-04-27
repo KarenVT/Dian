@@ -7,9 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
-class Merchant extends Model
+class Company extends Model
 {
     use HasFactory, HasApiTokens;
+
+    /**
+     * La tabla asociada con el modelo.
+     *
+     * @var string
+     */
+    protected $table = 'companies';
 
     /**
      * Los atributos que son asignables en masa.
@@ -19,10 +26,8 @@ class Merchant extends Model
     protected $fillable = [
         'nit',
         'business_name',
-        'email',
-        'password',
-        'tax_regime',
-        'certificate_path',
+        'phone',
+        'address',
     ];
 
     /**
@@ -50,7 +55,7 @@ class Merchant extends Model
      */
     public function users(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'company_id');
     }
     
     /**
@@ -60,7 +65,7 @@ class Merchant extends Model
      */
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Product::class, 'company_id');
     }
     
     /**
@@ -70,6 +75,6 @@ class Merchant extends Model
      */
     public function invoices(): HasMany
     {
-        return $this->hasMany(Invoice::class);
+        return $this->hasMany(Invoice::class, 'company_id');
     }
 } 

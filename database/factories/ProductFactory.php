@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Merchant;
+use App\Models\company;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,8 +18,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'merchant_id' => Merchant::factory(),
-            'sku' => 'PROD' . fake()->unique()->numerify('######'),
+            'company_id' => company::factory(),
             'name' => fake()->sentence(3),
             'price' => fake()->randomFloat(2, 10, 10000),
             'tax_rate' => fake()->randomElement([0, 5, 19]),
@@ -28,15 +27,15 @@ class ProductFactory extends Factory
     }
     
     /**
-     * Asigna un merchant específico al producto.
+     * Asigna un company específico al producto.
      *
-     * @param int $merchantId
+     * @param int $companyId
      * @return static
      */
-    public function forMerchant($merchantId): static
+    public function forcompany($companyId): static
     {
         return $this->state(fn (array $attributes) => [
-            'merchant_id' => $merchantId,
+            'comap' => $companyId,
         ]);
     }
 }

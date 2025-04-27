@@ -50,6 +50,11 @@ class CustomerDTO
     public ?string $country;
     
     /**
+     * @var string|null Tipo de documento del cliente (CC, NIT, etc.)
+     */
+    public ?string $documentType;
+    
+    /**
      * Constructor del DTO del cliente
      *
      * @param string $id
@@ -61,6 +66,7 @@ class CustomerDTO
      * @param string|null $state
      * @param string|null $postalCode
      * @param string|null $country
+     * @param string|null $documentType
      */
     public function __construct(
         string $id,
@@ -71,7 +77,8 @@ class CustomerDTO
         ?string $city = null,
         ?string $state = null,
         ?string $postalCode = null,
-        ?string $country = 'CO'
+        ?string $country = 'CO',
+        ?string $documentType = 'CC'
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -82,6 +89,7 @@ class CustomerDTO
         $this->state = $state;
         $this->postalCode = $postalCode;
         $this->country = $country;
+        $this->documentType = $documentType;
     }
     
     /**
@@ -101,7 +109,8 @@ class CustomerDTO
             $data['city'] ?? null,
             $data['state'] ?? null,
             $data['postal_code'] ?? null,
-            $data['country'] ?? 'CO'
+            $data['country'] ?? 'CO',
+            $data['document_type'] ?? 'CC'
         );
     }
 } 

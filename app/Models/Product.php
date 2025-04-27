@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -17,12 +18,10 @@ class Product extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'merchant_id',
-        'sku',
+        'company_id',
         'name',
         'price',
         'tax_rate',
-        'dian_code',
     ];
 
     /**
@@ -36,12 +35,22 @@ class Product extends Model
     ];
 
     /**
-     * Obtiene el comercio al que pertenece este producto.
+     * Obtiene la empresa a la que pertenece este producto.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function merchant(): BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(Merchant::class);
+        return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Obtiene el historial de precios del producto.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function priceHistory(): HasMany
+    {
+        return $this->hasMany(ProductPriceHistory::class);
     }
 }

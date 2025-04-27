@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('merchants', function (Blueprint $table) {
+        Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->string('nit', 10)->unique();
+            $table->string('nit', 20)->unique();
             $table->string('business_name', 255);
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->enum('tax_regime', ['COMÚN', 'SIMPLE', 'NO_RESPONSABLE_IVA']);
-            $table->string('certificate_path')->nullable();
+            $table->string('address')->nullable();
+            $table->string('phone', 20)->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('merchants');
+        Schema::dropIfExists('companies');
     }
 }; 

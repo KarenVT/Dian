@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\DTOs\CartDTO;
 use App\DTOs\CustomerDTO;
-use App\Models\Merchant;
+use App\Models\company;
 use App\Services\DianStorageService;
 use App\Services\InvoiceService;
 use Carbon\Carbon;
@@ -17,9 +17,9 @@ class DianStorageTest extends TestCase
     use RefreshDatabase;
     
     /**
-     * @var Merchant
+     * @var company
      */
-    protected $merchant;
+    protected $company;
     
     /**
      * @var DianStorageService
@@ -42,7 +42,7 @@ class DianStorageTest extends TestCase
         Storage::fake('local');
         
         // Crear un comercio de prueba
-        $this->merchant = Merchant::factory()->create([
+        $this->company = company::factory()->create([
             'nit' => '900987654',
             'business_name' => 'Empresa Prueba DIAN',
             'email' => 'dian@prueba.com',
@@ -52,7 +52,7 @@ class DianStorageTest extends TestCase
         
         // Instanciar servicios
         $this->dianStorageService = new DianStorageService();
-        $this->invoiceService = new InvoiceService($this->merchant, $this->dianStorageService);
+        $this->invoiceService = new InvoiceService($this->company, $this->dianStorageService);
     }
     
     /**
@@ -65,7 +65,7 @@ class DianStorageTest extends TestCase
         
         // Verificar la estructura de carpetas
         $basePath = $this->dianStorageService->getBasePath(
-            $this->merchant->nit,
+            $this->company->nit,
             $testDate
         );
         
@@ -121,7 +121,7 @@ class DianStorageTest extends TestCase
         // Almacenar un documento XML
         $path = $this->dianStorageService->storeDocument(
             $content,
-            $this->merchant->nit,
+            $this->company->nit,
             $invoiceNumber,
             $cufe,
             'xml',
@@ -129,7 +129,7 @@ class DianStorageTest extends TestCase
         );
         
         // Verificar que el archivo existe en la ubicación correcta
-        $expectedPath = "fev/{$this->merchant->nit}/2023/05/FV_{$invoiceNumber}_{$cufe}.xml";
+        $expectedPath = "fev/{$this->company->nit}/2023/05/FV_{$invoiceNumber}_{$cufe}.xml";
         $this->assertEquals($expectedPath, $path);
         Storage::assertExists($path);
         
@@ -183,11 +183,11 @@ class DianStorageTest extends TestCase
         $this->assertNotNull($invoice);
         $this->assertDatabaseHas('invoices', [
             'id' => $invoice->id,
-            'merchant_id' => $this->merchant->id
+            'company_id' => $this->company->id
         ]);
         
         // Verificar que los archivos se guardaron según la normativa DIAN
-        $expectedPath = "fev/{$this->merchant->nit}/2023/06/";
+        $expectedPath = "fev/{$this->company->nit}/2023/06/";
         
         // Verificar el XML
         $this->assertStringStartsWith($expectedPath, $invoice->xml_path);
@@ -228,7 +228,7 @@ class DianStorageTest extends TestCase
         // Almacenar un documento viejo
         $oldPath = $this->dianStorageService->storeDocument(
             $content,
-            $this->merchant->nit,
+            $this->company->nit,
             $invoiceNumber,
             $cufe,
             'xml',
@@ -239,7 +239,7 @@ class DianStorageTest extends TestCase
         $recentDate = Carbon::create(2028, 1, 15); // menos de 5 años
         $recentPath = $this->dianStorageService->storeDocument(
             'Recent content',
-            $this->merchant->nit,
+            $this->company->nit,
             'SEFT00000100',
             hash('sha384', 'recent_test'),
             'xml',

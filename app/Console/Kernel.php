@@ -18,6 +18,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('dian:cleanup --notify=admin@example.com --dry-run')
             ->monthlyOn(1, '02:00') // Ejecutar el día 1 de cada mes a las 2am
             ->appendOutputTo(storage_path('logs/dian-cleanup.log'));
+        
+        // Procesar facturas pendientes con DIAN cada hora
+        $schedule->command('dian:process-invoices')->hourly();
             
         // Procesar trabajos de la cola
         $schedule->command('queue:work --stop-when-empty --tries=3')
@@ -50,5 +53,6 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\DianCleanupCommand::class,
+        \App\Console\Commands\ProcessDianInvoices::class,
     ];
 }

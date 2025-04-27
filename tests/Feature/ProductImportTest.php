@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Merchant;
+use App\Models\company;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,19 +16,19 @@ class ProductImportTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $merchant;
+    protected $company;
     protected $user;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Crear un merchant para las pruebas
-        $this->merchant = Merchant::factory()->create();
+        // Crear un company para las pruebas
+        $this->company = company::factory()->create();
 
-        // Crear un usuario asociado al merchant
+        // Crear un usuario asociado al company
         $this->user = User::factory()->create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
         ]);
 
         // Autenticar al usuario
@@ -44,7 +44,7 @@ class ProductImportTest extends TestCase
 
         // Crear un producto existente para simular duplicidad
         Product::create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'sku' => 'PROD001',
             'name' => 'Producto Test 1',
             'price' => 100.00,

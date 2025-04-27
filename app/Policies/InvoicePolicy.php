@@ -4,7 +4,7 @@ namespace App\Policies;
 
 use App\Models\Invoice;
 use App\Models\User;
-use App\Models\Merchant;
+use App\Models\company;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -15,24 +15,24 @@ class InvoicePolicy
     /**
      * Determina si el usuario puede ver la factura.
      *
-     * @param  \App\Models\User|\App\Models\Merchant|null  $user
+     * @param  \App\Models\User|\App\Models\company|null  $user
      * @param  \App\Models\Invoice  $invoice
      * @return \Illuminate\Auth\Access\Response|bool
      */
     public function view($user, Invoice $invoice)
     {
-        // Si el modelo autenticado es un Merchant
-        if ($user instanceof Merchant) {
+        // Si el modelo autenticado es un company
+        if ($user instanceof company) {
             // Solo si es el dueño de la factura
-            return $user->id === $invoice->merchant_id
+            return $user->id === $invoice->company_id
                 ? Response::allow()
                 : Response::deny('No está autorizado para acceder a esta factura.');
         }
         
         // Si el modelo autenticado es un User
         if ($user instanceof User) {
-            // Si el usuario es contador de este comercio
-            if ($user->hasRole('contador') && $user->merchant_id === $invoice->merchant_id) {
+            // Si el usuario es comerciante de este comercio
+            if ($user->hasRole('comerciante') && $user->company_id === $invoice->company_id) {
                 return Response::allow();
             }
             
@@ -50,7 +50,7 @@ class InvoicePolicy
     /**
      * Determina si el usuario puede descargar el PDF de la factura.
      *
-     * @param  \App\Models\User|\App\Models\Merchant|null  $user
+     * @param  \App\Models\User|\App\Models\company|null  $user
      * @param  \App\Models\Invoice  $invoice
      * @return \Illuminate\Auth\Access\Response|bool
      */

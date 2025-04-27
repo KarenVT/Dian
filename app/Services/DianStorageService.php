@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
-use App\Models\Merchant;
+use App\Models\company;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -13,17 +13,17 @@ class DianStorageService
     /**
      * Genera la ruta base para almacenamiento de documentos electrónicos según normativa DIAN
      *
-     * @param string $merchantNit NIT del comercio
+     * @param string $companyNit NIT del comercio
      * @param Carbon|null $date Fecha para la estructura de carpetas (default: hoy)
      * @return string Ruta base para almacenamiento
      */
-    public function getBasePath(string $merchantNit, ?Carbon $date = null): string
+    public function getBasePath(string $companyNit, ?Carbon $date = null): string
     {
         $date = $date ?? Carbon::now();
         
         return sprintf(
             'fev/%s/%s/%s',
-            $merchantNit,
+            $companyNit,
             $date->format('Y'),
             $date->format('m')
         );
@@ -47,7 +47,7 @@ class DianStorageService
      * Almacena un documento XML/PDF según la normativa DIAN
      * 
      * @param string $content Contenido del archivo
-     * @param string $merchantNit NIT del comercio
+     * @param string $companyNit NIT del comercio
      * @param string $consecutive Número consecutivo de la factura
      * @param string|null $cufe CUFE de la factura (opcional para tickets POS)
      * @param string $extension Extensión del archivo (.xml o .pdf)
@@ -56,13 +56,13 @@ class DianStorageService
      */
     public function storeDocument(
         string $content, 
-        string $merchantNit, 
+        string $companyNit, 
         string $consecutive, 
         ?string $cufe, 
         string $extension,
         ?Carbon $date = null
     ): string {
-        $basePath = $this->getBasePath($merchantNit, $date);
+        $basePath = $this->getBasePath($companyNit, $date);
         $fileName = $this->getFileName($consecutive, $cufe, $extension);
         $fullPath = $basePath . '/' . $fileName;
         
@@ -84,7 +84,7 @@ class DianStorageService
     public function storeInvoiceDocuments(Invoice $invoice): array
     {
         $date = $invoice->issued_at;
-        $merchant = $invoice->merchant;
+        $company = $invoice->company;
         $consecutive = $invoice->invoice_number;
         $cufe = $invoice->cufe;
         
@@ -99,7 +99,7 @@ class DianStorageService
             $xmlContent = Storage::get($invoice->xml_path);
             $paths['xml_path'] = $this->storeDocument(
                 $xmlContent, 
-                $merchant->nit, 
+                $company->nit, 
                 $consecutive, 
                 $cufe, 
                 'xml',
@@ -116,7 +116,7 @@ class DianStorageService
             $pdfContent = Storage::get($invoice->pdf_path);
             $paths['pdf_path'] = $this->storeDocument(
                 $pdfContent, 
-                $merchant->nit, 
+                $company->nit, 
                 $consecutive, 
                 $cufe, 
                 'pdf',
@@ -133,7 +133,7 @@ class DianStorageService
             $signedXmlContent = Storage::get($invoice->signed_xml_path);
             $paths['signed_xml_path'] = $this->storeDocument(
                 $signedXmlContent, 
-                $merchant->nit, 
+                $company->nit, 
                 $consecutive, 
                 $cufe, 
                 'signed.xml',
@@ -164,11 +164,11 @@ class DianStorageService
         $expirationDate = $referenceDate->copy()->subYears(5);
         
         $expiredFiles = [];
-        $merchantDirectories = Storage::directories('fev');
+        $companyDirectories = Storage::directories('fev');
         
-        foreach ($merchantDirectories as $merchantDir) {
-            $merchantNit = basename($merchantDir);
-            $yearDirectories = Storage::directories($merchantDir);
+        foreach ($companyDirectories as $companyDir) {
+            $companyNit = basename($companyDir);
+            $yearDirectories = Storage::directories($companyDir);
             
             foreach ($yearDirectories as $yearDir) {
                 $year = basename($yearDir);
@@ -191,7 +191,7 @@ class DianStorageService
                         foreach ($files as $file) {
                             $fileInfo = [
                                 'path' => $file,
-                                'merchantNit' => $merchantNit,
+                                'companyNit' => $companyNit,
                                 'year' => $year,
                                 'month' => $month,
                                 'filename' => basename($file),

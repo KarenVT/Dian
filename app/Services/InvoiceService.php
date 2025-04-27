@@ -6,7 +6,7 @@ use App\DTOs\CartDTO;
 use App\DTOs\CustomerDTO;
 use App\Events\TicketPosCreated;
 use App\Models\Invoice;
-use App\Models\Merchant;
+use App\Models\Company;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +24,9 @@ class InvoiceService
     private string $invoicePrefix = 'SEFT';
     
     /**
-     * @var Merchant Instancia del comercio que emite la factura
+     * @var Company Instancia de la empresa que emite la factura
      */
-    private Merchant $merchant;
+    private Company $company;
     
     /**
      * @var DianStorageService Servicio para almacenamiento normativo DIAN
@@ -36,12 +36,12 @@ class InvoiceService
     /**
      * Constructor del servicio
      *
-     * @param Merchant $merchant El comercio que emite la factura
+     * @param Company $company La empresa que emite la factura
      * @param DianStorageService|null $dianStorageService Servicio de almacenamiento DIAN
      */
-    public function __construct(Merchant $merchant, ?DianStorageService $dianStorageService = null)
+    public function __construct(Company $company, ?DianStorageService $dianStorageService = null)
     {
-        $this->merchant = $merchant;
+        $this->company = $company;
         $this->dianStorageService = $dianStorageService ?? new DianStorageService();
     }
     
@@ -59,8 +59,8 @@ class InvoiceService
             // Generar número de factura (autoincremental)
             $invoiceNumber = $this->generateInvoiceNumber();
             
-            // Verificar si ya existe una factura con este número para este comercio (idempotencia)
-            $existingInvoice = Invoice::where('merchant_id', $this->merchant->id)
+            // Verificar si ya existe una factura con este número para esta empresa (idempotencia)
+            $existingInvoice = Invoice::where('company_id', $this->company->id)
                 ->where('invoice_number', $invoiceNumber)
                 ->first();
                 
@@ -92,7 +92,7 @@ class InvoiceService
             $xmlContent = $xml;
             $xmlPath = $this->dianStorageService->storeDocument(
                 $xmlContent,
-                $this->merchant->nit,
+                $this->company->nit,
                 $invoiceNumber,
                 $cufe,
                 'xml',
@@ -103,7 +103,7 @@ class InvoiceService
             $pdfContent = $this->generatePdfContent($xmlArray, $invoiceNumber);
             $pdfPath = $this->dianStorageService->storeDocument(
                 $pdfContent,
-                $this->merchant->nit,
+                $this->company->nit,
                 $invoiceNumber,
                 $cufe,
                 'pdf',
@@ -113,7 +113,7 @@ class InvoiceService
             // Guardar la factura en la base de datos usando transacción
             $invoice = DB::transaction(function () use ($cart, $customer, $invoiceNumber, $documentType, $cufe, $xmlPath, $pdfPath, $signedXmlPath, $issuedAt) {
                 return Invoice::create([
-                    'merchant_id' => $this->merchant->id,
+                    'company_id' => $this->company->id,
                     'invoice_number' => $invoiceNumber,
                     'type' => $cart->type,
                     'document_type' => $documentType,
@@ -130,6 +130,10 @@ class InvoiceService
                     'issued_at' => $issuedAt,
                     'due_date' => $cart->dueDate ? Carbon::parse($cart->dueDate) : null,
                     'notes' => $cart->notes,
+                    'access_token' => Str::random(64), // Generar token de acceso único
+                    // Campos DIAN iniciales
+                    'dian_status' => $documentType === 'invoice' ? 'pending' : null,
+                    'dian_retry_count' => 0,
                 ]);
             });
             
@@ -153,8 +157,8 @@ class InvoiceService
      */
     private function generateInvoiceNumber(): string
     {
-        // Obtener el último número de factura de este comercio
-        $lastInvoice = Invoice::where('merchant_id', $this->merchant->id)
+        // Obtener el último número de factura de esta empresa
+        $lastInvoice = Invoice::where('company_id', $this->company->id)
             ->orderBy('id', 'desc')
             ->first();
             
@@ -207,15 +211,15 @@ class InvoiceService
                 'cbc:AdditionalAccountID' => '1',
                 'cac:Party' => [
                     'cac:PartyIdentification' => [
-                        'cbc:ID' => ['_attributes' => ['schemeAgencyID' => '195', 'schemeID' => '0', 'schemeName' => '31'], '_value' => $this->merchant->nit],
+                        'cbc:ID' => ['_attributes' => ['schemeAgencyID' => '195', 'schemeID' => '0', 'schemeName' => '31'], '_value' => $this->company->nit],
                     ],
                     'cac:PartyName' => [
-                        'cbc:Name' => $this->merchant->business_name,
+                        'cbc:Name' => $this->company->business_name,
                     ],
                     'cac:PartyTaxScheme' => [
-                        'cbc:RegistrationName' => $this->merchant->business_name,
-                        'cbc:CompanyID' => ['_attributes' => ['schemeAgencyID' => '195', 'schemeID' => '0', 'schemeName' => '31'], '_value' => $this->merchant->nit],
-                        'cbc:TaxLevelCode' => $this->merchant->tax_regime,
+                        'cbc:RegistrationName' => $this->company->business_name,
+                        'cbc:CompanyID' => ['_attributes' => ['schemeAgencyID' => '195', 'schemeID' => '0', 'schemeName' => '31'], '_value' => $this->company->nit],
+                        'cbc:TaxLevelCode' => $this->company->tax_regime,
                         'cac:RegistrationAddress' => [
                             'cbc:ID' => '11001',
                             'cbc:CityName' => 'BOGOTA',
@@ -247,7 +251,11 @@ class InvoiceService
                     ],
                     'cac:PartyTaxScheme' => [
                         'cbc:RegistrationName' => $customer->name,
-                        'cbc:CompanyID' => ['_attributes' => ['schemeAgencyID' => '195', 'schemeID' => '0', 'schemeName' => '13'], '_value' => $customer->id],
+                        'cbc:CompanyID' => ['_attributes' => [
+                            'schemeAgencyID' => '195', 
+                            'schemeID' => '0', 
+                            'schemeName' => $this->getSchemeNameForDocumentType($customer->documentType)
+                        ], '_value' => $customer->id],
                         'cbc:TaxLevelCode' => 'R-99-PN',
                         'cac:RegistrationAddress' => [
                             'cbc:ID' => '11001',
@@ -269,7 +277,11 @@ class InvoiceService
                     ],
                     'cac:PartyLegalEntity' => [
                         'cbc:RegistrationName' => $customer->name,
-                        'cbc:CompanyID' => ['_attributes' => ['schemeAgencyID' => '195', 'schemeID' => '0', 'schemeName' => '13'], '_value' => $customer->id],
+                        'cbc:CompanyID' => ['_attributes' => [
+                            'schemeAgencyID' => '195', 
+                            'schemeID' => '0', 
+                            'schemeName' => $this->getSchemeNameForDocumentType($customer->documentType)
+                        ], '_value' => $customer->id],
                     ],
                     'cac:Contact' => [
                         'cbc:ElectronicMail' => $customer->email ?? '',
@@ -384,7 +396,7 @@ class InvoiceService
             number_format($cart->total, 2, '.', ''),
             '01', // Código de impuesto (IVA)
             number_format($cart->tax, 2, '.', ''),
-            $this->merchant->nit,
+            $this->company->nit,
             $customer->id,
             '1', // Tipo de operación
             'COP', // Moneda
@@ -405,12 +417,12 @@ class InvoiceService
     private function signXml(string $xml, string $cufe): string
     {
         // Comprobar que el comercio tenga un certificado
-        if (empty($this->merchant->certificate_path) || !Storage::exists($this->merchant->certificate_path)) {
+        if (empty($this->company->certificate_path) || !Storage::exists($this->company->certificate_path)) {
             throw new Exception("No se encontró el certificado digital del comercio");
         }
         
         // Cargar el certificado desde storage
-        $certPath = Storage::path($this->merchant->certificate_path);
+        $certPath = Storage::path($this->company->certificate_path);
         
         // Actualizar el CUFE en el XML
         $xmlDoc = new \DOMDocument();
@@ -452,8 +464,8 @@ class InvoiceService
         $issuedAt = Carbon::now();
         $signedXmlPath = $this->dianStorageService->storeDocument(
             $signedXml, 
-            $this->merchant->nit, 
-            $this->merchant->id . '_' . Carbon::now()->timestamp,
+            $this->company->nit, 
+            $this->company->id . '_' . Carbon::now()->timestamp,
             $cufe, 
             'signed.xml',
             $issuedAt
@@ -481,5 +493,25 @@ class InvoiceService
     private function cleanupTempFiles(): void
     {
         // Implementar limpieza de archivos temporales si es necesario
+    }
+    
+    /**
+     * Obtiene el código de esquema para el tipo de documento
+     *
+     * @param string $documentType
+     * @return string
+     */
+    private function getSchemeNameForDocumentType(string $documentType): string
+    {
+        $schemeMap = [
+            'CC' => '13', // Cédula de ciudadanía
+            'NIT' => '31', // NIT
+            'CE' => '22', // Cédula de extranjería
+            'TI' => '12', // Tarjeta de identidad
+            'PP' => '41', // Pasaporte
+            'NIP' => '91', // Número de identificación personal
+        ];
+        
+        return $schemeMap[$documentType] ?? '13'; // Por defecto CC
     }
 } 

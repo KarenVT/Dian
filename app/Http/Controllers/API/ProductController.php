@@ -7,6 +7,7 @@ use App\Imports\ProductsImport;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -15,12 +16,41 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $merchantId = Auth::user()->merchant_id;
-        $products = Product::where('merchant_id', $merchantId)->get();
-        
-        return response()->json($products);
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['error' => 'Usuario no autenticado'], 401);
+            }
+            
+            $companyId = $user->company_id;
+            if (!$companyId) {
+                return response()->json(['error' => 'Usuario sin compañía asignada'], 400);
+            }
+            
+            $query = Product::where('company_id', $companyId);
+            
+            // Filtrar por búsqueda si está presente
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            }
+            
+            // Si es para el selector de productos en facturas, devolver sin paginar
+            if ($request->input('for') === 'invoice') {
+                $products = $query->select(['id', 'name', 'price', 'tax_rate'])->get();
+                return response()->json($products);
+            } else {
+                $products = $query->paginate($request->input('per_page', 10));
+                return response()->json($products);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error al obtener productos: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -29,11 +59,9 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'sku' => 'required|string|max:255|unique:products,sku,NULL,id,merchant_id,' . Auth::user()->merchant_id,
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'tax_rate' => 'required|numeric|min:0',
-            'dian_code' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -41,12 +69,10 @@ class ProductController extends Controller
         }
 
         $product = Product::create([
-            'merchant_id' => Auth::user()->merchant_id,
-            'sku' => $request->sku,
+            'company_id' => Auth::user()->company_id,
             'name' => $request->name,
             'price' => $request->price,
             'tax_rate' => $request->tax_rate,
-            'dian_code' => $request->dian_code,
         ]);
 
         return response()->json($product, 201);
@@ -57,7 +83,7 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::where('merchant_id', Auth::user()->merchant_id)
+        $product = Product::where('company_id', Auth::user()->company_id)
             ->where('id', $id)
             ->firstOrFail();
             
@@ -69,16 +95,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $product = Product::where('merchant_id', Auth::user()->merchant_id)
+        $product = Product::where('company_id', Auth::user()->company_id)
             ->where('id', $id)
             ->firstOrFail();
             
         $validator = Validator::make($request->all(), [
-            'sku' => 'required|string|max:255|unique:products,sku,' . $id . ',id,merchant_id,' . Auth::user()->merchant_id,
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'tax_rate' => 'required|numeric|min:0',
-            'dian_code' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -95,7 +119,7 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        $product = Product::where('merchant_id', Auth::user()->merchant_id)
+        $product = Product::where('company_id', Auth::user()->company_id)
             ->where('id', $id)
             ->firstOrFail();
             
@@ -117,10 +141,10 @@ class ProductController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $merchantId = Auth::user()->merchant_id;
+        $companyId = Auth::user()->company_id;
         
         try {
-            $import = new ProductsImport($merchantId);
+            $import = new ProductsImport($companyId);
             Excel::import($import, $request->file('file'));
             
             $result = [

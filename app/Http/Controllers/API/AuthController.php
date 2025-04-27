@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller
 {
@@ -32,8 +33,16 @@ class AuthController extends Controller
             ]);
         }
         
-        // Obtener las habilidades basadas en los permisos del usuario
-        $abilities = $user->getAllPermissions()->pluck('name')->toArray();
+        // Determinar las habilidades basadas en el rol
+        $abilities = [];
+        
+        // Si es administrador, dar todas las habilidades
+        if ($user->hasRole('admin')) {
+            $abilities = ['*']; // Wildcard para todas las habilidades
+        } else {
+            // Obtener las habilidades basadas en los permisos del usuario
+            $abilities = $user->getAllPermissions()->pluck('name')->toArray();
+        }
         
         // Crear token de API con las habilidades
         $token = $user->createToken($request->device_name, $abilities);
@@ -45,7 +54,8 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->getRoleNames(),
-                'permissions' => $abilities,
+                'permissions' => $user->getAllPermissions()->pluck('name'),
+                'abilities' => $abilities
             ]
         ]);
     }

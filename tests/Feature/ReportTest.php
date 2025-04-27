@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Invoice;
-use App\Models\Merchant;
+use App\Models\company;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,7 +15,7 @@ class ReportTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
-    private Merchant $merchant;
+    private company $company;
 
     protected function setUp(): void
     {
@@ -25,9 +25,9 @@ class ReportTest extends TestCase
         Cache::flush();
 
         // Crear un comercio y un usuario
-        $this->merchant = Merchant::factory()->create();
+        $this->company = company::factory()->create();
         $this->user = User::factory()->create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
         ]);
     }
 
@@ -37,7 +37,7 @@ class ReportTest extends TestCase
         // Crear facturas para el comercio
         // 1. Factura dentro del rango de fechas (día 1)
         Invoice::factory()->create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'issued_at' => Carbon::yesterday()->setHour(10),
             'subtotal' => 1000,
             'tax' => 190,
@@ -46,7 +46,7 @@ class ReportTest extends TestCase
 
         // 2. Factura dentro del rango de fechas (día 1)
         Invoice::factory()->create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'issued_at' => Carbon::yesterday()->setHour(15),
             'subtotal' => 2000,
             'tax' => 380,
@@ -55,7 +55,7 @@ class ReportTest extends TestCase
 
         // 3. Factura dentro del rango de fechas (día 2)
         Invoice::factory()->create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'issued_at' => Carbon::today(),
             'subtotal' => 3000,
             'tax' => 570,
@@ -64,7 +64,7 @@ class ReportTest extends TestCase
 
         // 4. Factura fuera del rango (anterior al rango)
         Invoice::factory()->create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'issued_at' => Carbon::now()->subDays(10),
             'subtotal' => 5000,
             'tax' => 950,
@@ -72,9 +72,9 @@ class ReportTest extends TestCase
         ]);
 
         // 5. Factura de otro comercio (dentro del rango)
-        $otherMerchant = Merchant::factory()->create();
+        $othercompany = company::factory()->create();
         Invoice::factory()->create([
-            'merchant_id' => $otherMerchant->id,
+            'company_id' => $othercompany->id,
             'issued_at' => Carbon::yesterday(),
             'subtotal' => 4000,
             'tax' => 760,

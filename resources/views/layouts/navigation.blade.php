@@ -15,6 +15,26 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    
+                    <x-nav-link :href="route('dian-demo.index')" :active="request()->routeIs('dian-demo.*')">
+                        {{ __('Simulador DIAN') }}
+                    </x-nav-link>
+                    
+                    @can('view_invoice')
+                    <x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                        {{ __('Facturas') }}
+                    </x-nav-link>
+                    @endcan
+                    
+                    @can('sell')
+                    <x-nav-link :href="route('invoices.create')" :active="request()->routeIs('invoices.create')">
+                        {{ __('Generar Factura') }}
+                    </x-nav-link>
+                    @endcan
+
+                    <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.*')">
+                        {{ __('Mi Compañía') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +89,26 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            
+            <x-responsive-nav-link :href="route('dian-demo.index')" :active="request()->routeIs('dian-demo.*')">
+                {{ __('Simulador DIAN') }}
+            </x-responsive-nav-link>
+            
+            @can('view_invoice')
+            <x-responsive-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                {{ __('Facturas') }}
+            </x-responsive-nav-link>
+            @endcan
+            
+            @can('sell')
+            <x-responsive-nav-link :href="route('invoices.create')" :active="request()->routeIs('invoices.create')">
+                {{ __('Generar Factura') }}
+            </x-responsive-nav-link>
+            @endcan
+
+            <x-responsive-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.*')">
+                {{ __('Mi Compañía') }}
             </x-responsive-nav-link>
         </div>
 

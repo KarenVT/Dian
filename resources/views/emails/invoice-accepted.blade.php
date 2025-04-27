@@ -69,12 +69,12 @@
         <p>Si tiene alguna pregunta o requiere información adicional, no dude en contactarnos.</p>
         
         <p>Atentamente,</p>
-        <p>{{ $invoice->merchant->name }}</p>
+        <p>{{ $invoice->company->name }}</p>
     </div>
 
     <div class="footer">
         <p>Este es un correo electrónico automático, por favor no responda a este mensaje.</p>
-        <p>&copy; {{ date('Y') }} {{ $invoice->merchant->name }}. Todos los derechos reservados.</p>
+        <p>&copy; {{ date('Y') }} {{ $invoice->company->name }}. Todos los derechos reservados.</p>
     </div>
 </body>
 </html> 

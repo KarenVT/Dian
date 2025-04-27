@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('merchant_id')->constrained()->onDelete('cascade');
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('invoice_number', 50);
             $table->enum('type', ['income', 'credit', 'debit']);
             $table->enum('document_type', ['invoice', 'ticket_pos']);
@@ -27,13 +27,14 @@ return new class extends Migration
             $table->text('xml_path')->nullable();
             $table->text('pdf_path')->nullable();
             $table->text('signed_xml_path')->nullable();
+            $table->string('access_token', 100)->unique()->nullable();
             $table->timestamp('issued_at');
             $table->timestamp('due_date')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             
-            // Índice único para merchant_id + invoice_number (prevenir duplicidad)
-            $table->unique(['merchant_id', 'invoice_number']);
+            // Índice único para company_id + invoice_number (prevenir duplicidad)
+            $table->unique(['company_id', 'invoice_number']);
         });
     }
 

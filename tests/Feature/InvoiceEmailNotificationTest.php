@@ -6,7 +6,7 @@ use App\Events\InvoiceAccepted;
 use App\Events\TicketPosCreated;
 use App\Mail\InvoiceMail;
 use App\Models\Invoice;
-use App\Models\Merchant;
+use App\Models\company;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
@@ -18,7 +18,7 @@ class InvoiceEmailNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected $merchant;
+    protected $company;
     protected $invoiceWithEmail;
     protected $ticketPosWithEmail;
     protected $invoiceWithoutEmail;
@@ -31,14 +31,14 @@ class InvoiceEmailNotificationTest extends TestCase
         Storage::fake('local');
         
         // Crear un comercio
-        $this->merchant = Merchant::factory()->create([
+        $this->company = company::factory()->create([
             'nit' => '900123456',
             'business_name' => 'Empresa Email Test',
         ]);
         
         // Crear una factura formal con email
         $this->invoiceWithEmail = Invoice::create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'invoice_number' => 'MAIL001',
             'type' => 'income',
             'document_type' => 'invoice',
@@ -56,7 +56,7 @@ class InvoiceEmailNotificationTest extends TestCase
         
         // Crear un ticket POS con email
         $this->ticketPosWithEmail = Invoice::create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'invoice_number' => 'MAIL002',
             'type' => 'income',
             'document_type' => 'ticket_pos',
@@ -73,7 +73,7 @@ class InvoiceEmailNotificationTest extends TestCase
         
         // Crear una factura sin email
         $this->invoiceWithoutEmail = Invoice::create([
-            'merchant_id' => $this->merchant->id,
+            'company_id' => $this->company->id,
             'invoice_number' => 'MAIL003',
             'type' => 'income',
             'document_type' => 'invoice',

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class MerchantRequest extends FormRequest
+class companyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -31,16 +31,16 @@ class MerchantRequest extends FormRequest
 
         // Reglas para la creación (store)
         if ($this->isMethod('post')) {
-            $rules['nit'] = ['required', 'string', 'regex:/^[0-9]{9,10}$/', 'unique:merchants,nit'];
+            $rules['nit'] = ['required', 'string', 'regex:/^[0-9]{9,10}$/', 'unique:companies,nit'];
             $rules['password'] = ['required', 'string', 'min:8'];
             $rules['certificate'] = ['required', 'file', 'mimes:p12', 'max:2048'];
         } 
         // Reglas para la actualización (update)
         else if ($this->isMethod('put') || $this->isMethod('patch')) {
-            $merchantId = $this->route('merchant');
-            $rules['nit'] = ['sometimes', 'required', 'string', 'regex:/^[0-9]{9,10}$/', Rule::unique('merchants')->ignore($merchantId)];
+            $companyId = $this->route('company');
+            $rules['nit'] = ['sometimes', 'required', 'string', 'regex:/^[0-9]{9,10}$/', Rule::unique('companies')->ignore($companyId)];
             $rules['password'] = ['sometimes', 'string', 'min:8'];
-            $rules['email'] = ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('merchants')->ignore($merchantId)];
+            $rules['email'] = ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('companies')->ignore($companyId)];
         }
 
         return $rules;
