@@ -35,7 +35,7 @@
                                 <!-- Tipo de Documento -->
                                 <div class="mb-4">
                                     <x-input-label for="document_type" :value="__('Tipo de Documento')" />
-                                    <select id="document_type" name="document_type" x-data="{ type: '{{ old('document_type', $customer->document_type) }}' }" x-model="type" x-on:change="setupIdMask(type)" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <select id="document_type" name="document_type" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                         @foreach($documentTypes as $value => $label)
                                             <option value="{{ $value }}" {{ old('document_type', $customer->document_type) == $value ? 'selected' : '' }}>{{ $label }}</option>
                                         @endforeach
@@ -45,22 +45,22 @@
                                     @enderror
                                 </div>
                                 
-                                <!-- Identificación con máscara -->
+                                <!-- Número de documento -->
                                 <div class="mb-4">
-                                    <x-input-label for="identification" :value="__('Identificación')" />
-                                    <div x-data="identificationMask()" class="mt-1">
-                                        <x-text-input 
-                                            id="identification" 
-                                            name="identification" 
-                                            type="text" 
-                                            class="block w-full" 
-                                            :value="old('identification', $customer->identification)" 
-                                            x-ref="input"
-                                            x-init="setupMask()"
-                                            required 
-                                        />
-                                    </div>
-                                    @error('identification')
+                                    <x-input-label for="document_number" :value="__('Número de Documento')" />
+                                    <x-text-input 
+                                        id="document_number" 
+                                        name="document_number" 
+                                        type="text" 
+                                        class="mt-1 block w-full" 
+                                        :value="old('document_number', $customer->document_number)" 
+                                        maxlength="10"
+                                        pattern="[0-9]{10}"
+                                        placeholder="1019876543"
+                                        required 
+                                    />
+                                    <p class="text-xs text-gray-500 mt-1">Formato: 10 dígitos sin espacios ni guiones</p>
+                                    @error('document_number')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -87,8 +87,10 @@
                                         class="mt-1 block w-full" 
                                         :value="old('phone', $customer->phone)" 
                                         x-data="{}"
-                                        x-mask="(999) 999-9999" 
+                                        x-mask="(999) 999-9999"
+                                        placeholder="(320) 987-6543"
                                     />
+                                    <p class="text-xs text-gray-500 mt-1">Formato: (XXX) XXX-XXXX</p>
                                     @error('phone')
                                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                     @enderror
@@ -128,56 +130,21 @@
     @push('scripts')
     <script src="https://unpkg.com/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
     <script>
-        function identificationMask() {
-            return {
-                setupMask() {
-                    // Obtiene el tipo de documento seleccionado
-                    const documentType = document.getElementById('document_type').value;
-                    this.setupIdMask(documentType);
-                },
-                
-                setupIdMask(type) {
-                    // Define las máscaras según el tipo de documento
-                    switch(type) {
-                        case 'CC':
-                            // Cédula: 10 dígitos
-                            Alpine.bind(this.$refs.input, () => ({
-                                'x-mask': '9999999999'
-                            }));
-                            break;
-                        case 'CE':
-                            // Cédula Extranjería: formato alfanumérico
-                            Alpine.bind(this.$refs.input, () => ({
-                                'x-mask': 'aaaaaaaaaa'
-                            }));
-                            break;
-                        case 'NIT':
-                            // NIT: 9 dígitos + 1 dígito verificador
-                            Alpine.bind(this.$refs.input, () => ({
-                                'x-mask': '999.999.999-9'
-                            }));
-                            break;
-                        case 'PP':
-                            // Pasaporte: alfanumérico
-                            Alpine.bind(this.$refs.input, () => ({
-                                'x-mask': 'aaaaaaaaa*'
-                            }));
-                            break;
-                        case 'TI':
-                            // Tarjeta de Identidad: 10 dígitos
-                            Alpine.bind(this.$refs.input, () => ({
-                                'x-mask': '9999999999'
-                            }));
-                            break;
-                        default:
-                            // Sin máscara para otros casos
-                            Alpine.bind(this.$refs.input, () => ({
-                                'x-mask': ''
-                            }));
-                    }
-                }
-            }
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveButton = document.querySelector('form button[type="submit"]');
+            
+            // Agregar evento para mostrar estado de carga al enviar el formulario
+            document.querySelector('form').addEventListener('submit', function() {
+                saveButton.disabled = true;
+                saveButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Actualizando...
+                `;
+            });
+        });
     </script>
     @endpush
 </x-app-layout> 

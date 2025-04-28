@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Auth;
 class CustomerController extends Controller
 {
     /**
+     * Constructor para aplicar middleware
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
      * Muestra el listado de clientes.
      */
     public function index(Request $request)

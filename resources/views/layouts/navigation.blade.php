@@ -26,11 +26,13 @@
                     </x-nav-link>
                     @endcan
                     
-                    @can('sell')
                     <x-nav-link :href="route('invoices.create')" :active="request()->routeIs('invoices.create')">
                         {{ __('Generar Factura') }}
                     </x-nav-link>
-                    @endcan
+                    
+                    <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                        {{ __('Mis Clientes') }}
+                    </x-nav-link>
 
                     <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.*')">
                         {{ __('Mi Compañía') }}
@@ -101,11 +103,13 @@
             </x-responsive-nav-link>
             @endcan
             
-            @can('sell')
             <x-responsive-nav-link :href="route('invoices.create')" :active="request()->routeIs('invoices.create')">
                 {{ __('Generar Factura') }}
             </x-responsive-nav-link>
-            @endcan
+            
+            <x-responsive-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                {{ __('Mis Clientes') }}
+            </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.*')">
                 {{ __('Mi Compañía') }}

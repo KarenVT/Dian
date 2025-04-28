@@ -191,32 +191,32 @@
                                 <svg class="mr-3 h-5 w-5 text-gray-500 group-hover:text-indigo-600 {{ request()->routeIs('dashboard') ? 'text-indigo-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                                 </svg>
-                                Dashboard
-                            </a>
-                            
-                            @can('sell')
+                            Dashboard
+                        </a>
+                        
+                        @can('sell')
                                 <a href="{{ route('companies.index') }}" class="group flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-indigo-50 hover:text-indigo-700 {{ request()->routeIs('companies.*') ? 'bg-indigo-50 text-indigo-700' : '' }}">
                                     <svg class="mr-3 h-5 w-5 text-gray-500 group-hover:text-indigo-600 {{ request()->routeIs('companies.*') ? 'text-indigo-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                     </svg>
                                     Mi Compañía
                                 </a>
-                                
-                                @if(Route::has('products.index'))
+                            
+                            @if(Route::has('products.index'))
                                 <a href="{{ route('products.index') }}" class="group flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-indigo-50 hover:text-indigo-700 {{ request()->routeIs('products.index') ? 'bg-indigo-50 text-indigo-700' : '' }}">
                                     <svg class="mr-3 h-5 w-5 text-gray-500 group-hover:text-indigo-600 {{ request()->routeIs('products.index') ? 'text-indigo-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                     </svg>
-                                    Productos
-                                </a>
-                                @else
+                                Productos
+                            </a>
+                            @else
                                 <span class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-400">
                                     <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                                     </svg>
-                                    Productos (No disponible)
-                                </span>
-                                @endif
+                                Productos (No disponible)
+                            </span>
+                            @endif
                                 
                                 @if(Route::has('customers.index'))
                                 <a href="{{ route('customers.index') }}" class="group flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-indigo-50 hover:text-indigo-700 {{ request()->routeIs('customers.index') ? 'bg-indigo-50 text-indigo-700' : '' }}">
@@ -233,61 +233,61 @@
                                     Mis Clientes (No disponible)
                                 </span>
                                 @endif
-                            @endcan
-                            
-                            @can('view_invoice')
-                                @if(Route::has('invoices.index'))
+                        @endcan
+                        
+                        @can('view_invoice')
+                            @if(Route::has('invoices.index'))
                                 <a href="{{ route('invoices.index') }}" class="group flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-indigo-50 hover:text-indigo-700 {{ request()->routeIs('invoices.index') ? 'bg-indigo-50 text-indigo-700' : '' }}">
                                     <svg class="mr-3 h-5 w-5 text-gray-500 group-hover:text-indigo-600 {{ request()->routeIs('invoices.index') ? 'text-indigo-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    Facturas
-                                </a>
-                                @else
+                                Facturas
+                            </a>
+                            @else
                                 <span class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-400">
                                     <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    Facturas (No disponible)
-                                </span>
-                                @endif
-                            @endcan
-                            
-                            @can('report')
-                                @if(Route::has('reports.index'))
+                                Facturas (No disponible)
+                            </span>
+                            @endif
+                        @endcan
+                        
+                        @can('report')
+                            @if(Route::has('reports.index'))
                                 <a href="{{ route('reports.index') }}" class="group flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-indigo-50 hover:text-indigo-700 {{ request()->routeIs('reports.index') ? 'bg-indigo-50 text-indigo-700' : '' }}">
                                     <svg class="mr-3 h-5 w-5 text-gray-500 group-hover:text-indigo-600 {{ request()->routeIs('reports.index') ? 'text-indigo-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                     </svg>
-                                    Reportes
-                                </a>
-                                @else
+                                Reportes
+                            </a>
+                            @else
                                 <span class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-400">
                                     <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                     </svg>
-                                    Reportes (No disponible)
-                                </span>
-                                @endif
-                            @endcan
-                            
-                            @role('admin')
-                                @if(Route::has('users.index'))
+                                Reportes (No disponible)
+                            </span>
+                            @endif
+                        @endcan
+                        
+                        @role('admin')
+                            @if(Route::has('users.index'))
                                 <a href="{{ route('users.index') }}" class="group flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-indigo-50 hover:text-indigo-700 {{ request()->routeIs('users.index') ? 'bg-indigo-50 text-indigo-700' : '' }}">
                                     <svg class="mr-3 h-5 w-5 text-gray-500 group-hover:text-indigo-600 {{ request()->routeIs('users.index') ? 'text-indigo-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                     </svg>
-                                    Usuarios/Roles
-                                </a>
-                                @else
+                                Usuarios/Roles
+                            </a>
+                            @else
                                 <span class="flex items-center px-2 py-2 rounded-md text-sm font-medium text-gray-400">
                                     <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                     </svg>
-                                    Usuarios/Roles (No disponible)
-                                </span>
-                                @endif
-                            @endrole
+                                Usuarios/Roles (No disponible)
+                            </span>
+                            @endif
+                        @endrole
                         </div>
                     </div>
                 </div>
@@ -296,38 +296,38 @@
             <!-- Contenido Principal -->
             <div class="sm:pl-56">
                 <div class="pt-12">
-                    <!-- Alertas Flash -->
+                <!-- Alertas Flash -->
                     {{-- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-                        @if (session('success'))
-                            <x-alert type="success">
-                                {{ session('success') }}
-                            </x-alert>
-                        @endif
+                    @if (session('success'))
+                        <x-alert type="success">
+                            {{ session('success') }}
+                        </x-alert>
+                    @endif
 
-                        @if (session('error'))
-                            <x-alert type="error">
-                                {{ session('error') }}
-                            </x-alert>
-                        @endif
+                    @if (session('error'))
+                        <x-alert type="error">
+                            {{ session('error') }}
+                        </x-alert>
+                    @endif
                     </div> --}}
 
-                    <!-- Header -->
-                    @if (isset($header))
+                <!-- Header -->
+                @if (isset($header))
                         <header class="bg-white shadow-sm">
                             <div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
-                                {{ $header }}
-                            </div>
-                        </header>
-                    @endif
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endif
 
                     <!-- Contenido de la Página -->
                     <main>
                         {{ $slot }}
                     </main>
-                </div>
+                    </div>
             </div>
         </div>
-
+        
         @stack('scripts')
     </body>
 </html>

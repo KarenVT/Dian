@@ -78,7 +78,7 @@
             <div class="auth-card">
                 <div class="auth-body">
                     {{ $slot }}
-                </div>
+            </div>
             </div>
         </div>
     </body>

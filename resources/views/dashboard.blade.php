@@ -40,8 +40,8 @@
                             <p class="text-2xl font-bold text-yellow-600" x-text="dianStatus">0/0</p>
                             <p class="text-xs text-gray-500 mt-1">Pendientes / Rechazadas</p>
                         </div>
+                        </div>
                     </div>
-                </div>
 
                 <!-- Tarjetas de navegación -->
                 <h3 class="text-sm font-medium text-gray-700 mb-2">Accesos rápidos</h3>
@@ -87,7 +87,7 @@
                             <div>
                                 <h3 class="font-medium text-gray-800">Reportes</h3>
                                 <p class="text-xs text-gray-500 mt-0.5">Informes y estadísticas</p>
-                            </div>
+                    </div>
                         </div>
                     </a>
 

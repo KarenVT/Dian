@@ -62,27 +62,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/products/{product}/price-history', [ProductController::class, 'priceHistory'])->name('products.price-history');
     });
     
-    // Ruta especial para obtener productos en el formulario de facturas (también para comerciantes con permiso 'sell')
-    Route::middleware(['auth', 'can:sell'])->get('/obtener-productos-para-factura', [ProductController::class, 'getProductsForInvoice'])->name('products.for-invoice');
+    // Ruta especial para obtener productos en el formulario de facturas
+    Route::get('/obtener-productos-para-factura', [ProductController::class, 'getProductsForInvoice'])->name('products.for-invoice');
     
-    // Ruta para generar facturas desde el formulario web (para comerciantes con permiso 'sell')
-    Route::middleware(['auth', 'can:sell'])->post('/generar-factura', [InvoiceController::class, 'generateInvoice'])->name('invoices.generate');
+    // Ruta para generar facturas desde el formulario web
+    Route::post('/generar-factura', [InvoiceController::class, 'generateInvoice'])->name('invoices.generate');
     
     // Clientes
-    Route::middleware('can:sell')->group(function () {
-        Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-        Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
-        Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
-        Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
-        Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
-        Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
-    });
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
     
     // Facturas
     Route::middleware('can:view_invoice')->group(function () {
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/search', [InvoiceController::class, 'search'])->name('invoices.search');
-        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create')->middleware('can:sell');
+        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::put('/invoices/{invoice}/resend', [InvoiceController::class, 'resend'])->name('invoices.resend');
     });
