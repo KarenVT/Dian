@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="mb-8 text-center">
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Bienvenido(a)</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">Bienvenido</h1>
         <p class="text-sm text-gray-600">Inicia sesión con tus credenciales</p>
     </div>
 

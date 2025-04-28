@@ -180,16 +180,6 @@
                             <h3 class="text-lg font-medium text-gray-800 mb-4">Información Adicional</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
-                                    <x-input-label for="payment_method" value="Método de Pago" />
-                                    <select id="payment_method" x-model="formData.payment_method" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                        <option value="1">Efectivo</option>
-                                        <option value="2">Crédito</option>
-                                        <option value="3">Tarjeta Débito</option>
-                                        <option value="4">Tarjeta Crédito</option>
-                                        <option value="5">Transferencia Bancaria</option>
-                                    </select>
-                                </div>
-                                <div>
                                     <x-input-label for="payment_means" value="Medio de Pago" />
                                     <select id="payment_means" x-model="formData.payment_means" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                         <option value="10">Efectivo</option>
@@ -199,18 +189,6 @@
                                         <option value="47">Tarjeta débito</option>
                                         <option value="48">Tarjeta crédito</option>
                                         <option value="49">Tarjeta prepago</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <x-input-label for="operation_type" value="Tipo de Operación" />
-                                    <select id="operation_type" x-model="formData.operation_type" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                        <option value="10">Estándar</option>
-                                        <option value="09">AIU</option>
-                                        <option value="11">Mandatos</option>
-                                        <option value="20">Nota Crédito</option>
-                                        <option value="22">Nota Débito</option>
                                     </select>
                                 </div>
                                 <div>

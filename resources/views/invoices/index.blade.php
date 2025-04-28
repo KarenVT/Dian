@@ -119,14 +119,12 @@
                                         <label for="select-all" class="sr-only">Seleccionar todo</label>
                                     </div>
                                 </th>
-                                <th scope="col" class="p-2 whitespace-nowrap">D S N X M V Z C</th>
                                 <th scope="col" class="py-3 px-2">Tipo</th>
                                 <th scope="col" class="py-3 px-2">Pref.</th>
                                 <th scope="col" class="py-3 px-2">Número</th>
                                 <th scope="col" class="py-3 px-2">Type code</th>
                                 <th scope="col" class="py-3 px-2">Fecha</th>
                                 <th scope="col" class="py-3 px-2">V Total</th>
-                                <th scope="col" class="py-3 px-2">A R E X T</th>
                                 <th scope="col" class="py-3 px-2">Acciones</th>
                             </tr>
                         </thead>
@@ -139,18 +137,6 @@
                                             <label class="sr-only">Seleccionar factura</label>
                                         </div>
                                     </td>
-                                    <td class="p-2">
-                                        <div class="flex space-x-1">
-                                            <span class="w-4 h-4 inline-block bg-blue-400 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                        </div>
-                                    </td>
                                     <td class="py-3 px-2 font-medium text-gray-900">FS1</td>
                                     <td class="py-3 px-2">FECI</td>
                                     <td class="py-3 px-2 font-medium">
@@ -160,16 +146,8 @@
                                     <td class="py-3 px-2">
                                         {{ $invoice->issued_at->format('d-m-Y') }}
                                     </td>
-                                    <td class="py-3 px-2 font-medium text-right">
-                                        ${{ number_format($invoice->total, 2) }}
-                                    </td>
-                                    <td class="py-3 px-2">
-                                        <div class="flex space-x-1">
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                            <span class="w-4 h-4 inline-block bg-gray-200 rounded-full"></span>
-                                        </div>
+                                    <td class="py-3 px-2 font-medium text-left whitespace-nowrap pr-4">
+                                        ${{ number_format($invoice->total, 2, '.', ',') }}
                                     </td>
                                     <td class="py-3 px-2 flex items-center space-x-3">
                                         <a href="/api/invoices/{{ $invoice->id }}/pdf" target="_blank" title="Descargar PDF" class="text-blue-600 hover:text-blue-900">
@@ -184,7 +162,7 @@
                                 </tr>
                             @empty
                                 <tr class="bg-white border-b">
-                                    <td colspan="10" class="py-10 px-6 text-center text-gray-500">
+                                    <td colspan="8" class="py-10 px-6 text-center text-gray-500">
                                         No se encontraron facturas.
                                     </td>
                                 </tr>

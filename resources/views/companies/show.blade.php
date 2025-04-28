@@ -36,7 +36,7 @@
                         <div>
                             <h3 class="text-lg font-semibold mb-2">Estadísticas</h3>
                             <div class="bg-gray-50 p-4 rounded">
-                                <p class="mb-2"><span class="font-semibold">Usuarios:</span> {{ $company->users->count() }}</p>
+                                <p class="mb-2"><span class="font-semibold">Clientes:</span> {{ $company->users->count() }}</p>
                                 <p class="mb-2"><span class="font-semibold">Productos:</span> {{ $company->products->count() }}</p>
                                 <p><span class="font-semibold">Facturas:</span> {{ $company->invoices->count() }}</p>
                             </div>
