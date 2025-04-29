@@ -31,7 +31,6 @@
                                     >
                                 </form>
                             </div>
-                            
                             <!-- Botones de acción -->
                             <div class="flex gap-3">
                                 <div x-data="{ exportDropdownOpen: false }" class="relative">
@@ -99,7 +98,6 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                                             <div class="flex justify-end items-center space-x-2">
                                                 <a href="{{ route('products.edit', $product) }}" class="text-indigo-600 hover:text-indigo-900">Editar</a>
-                                                <a href="{{ route('products.price-history', $product) }}" class="text-blue-600 hover:text-blue-900 ml-2">Historial de precios</a>
                                                 <form action="{{ route('products.destroy', $product) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     @method('DELETE')

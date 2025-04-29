@@ -16,36 +16,35 @@ use Illuminate\Support\Str;
 class InvoiceController extends Controller
 {
     /**
-     * Display a listing of the invoices.
+     * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $query = Invoice::query();
         
-        // Filtrado por fecha (si se proporciona)
-        if ($request->filled(['start_date', 'end_date'])) {
-            $query->whereBetween('issued_at', [
-                $request->start_date . ' 00:00:00',
-                $request->end_date . ' 23:59:59'
-            ]);
-        }
-        
-        // Filtrado por estado (si se proporciona)
-        if ($request->filled('status')) {
-            $query->whereHas('dianResolution', function($query) use ($request) {
-            $query->where('dian_status', $request->status);
-            });
-        }
-        
-        // Filtrado por número de factura (si se proporciona)
+        // Aplicar filtros si existen
         if ($request->filled('invoice_number')) {
             $query->where('invoice_number', 'like', '%' . $request->invoice_number . '%');
         }
         
-        // Ordenar por fecha de emisión (más reciente primero)
-        $query->orderBy('issued_at', 'desc');
+        if ($request->filled('start_date')) {
+            $query->whereDate('issued_at', '>=', $request->start_date);
+        }
         
-        $invoices = $query->paginate(10);
+        if ($request->filled('end_date')) {
+            $query->whereDate('issued_at', '<=', $request->end_date);
+        }
+        
+        if ($request->filled('status') && $request->status !== '') {
+            $query->where('dian_status', $request->status);
+        }
+        
+        $invoices = $query->orderBy('created_at', 'desc')->paginate(10);
+        
+        // Si es una solicitud AJAX, devolver solo la vista parcial
+        if ($request->ajax() || $request->has('ajax')) {
+            return view('invoices.partials.invoice-table', compact('invoices'));
+        }
         
         return view('invoices.index', compact('invoices'));
     }
@@ -89,25 +88,6 @@ class InvoiceController extends Controller
     }
     
     /**
-     * Busca facturas por número de factura.
-     */
-    public function search(Request $request)
-    {
-        // Validar que se proporcione un número de factura
-        $request->validate(['invoice_number' => 'required|string|min:1']);
-        
-        // Realizar la búsqueda
-        $query = Invoice::query()
-            ->where('invoice_number', 'like', '%' . $request->invoice_number . '%')
-            ->orderBy('issued_at', 'desc');
-        
-        $invoices = $query->paginate(10);
-        
-        // Redirigir con resultados a la vista de índice
-        return view('invoices.index', compact('invoices'));
-    }
-
-    /**
      * Genera una factura desde el formulario web.
      * Esta ruta es accesible para usuarios con el permiso 'sell'.
      */
@@ -132,8 +112,6 @@ class InvoiceController extends Controller
                 'email' => 'nullable|email',
                 'phone' => 'required|string',
                 'address' => 'required|string',
-                'city' => 'required|string',
-                'state' => 'required|string',
                 'document_type' => 'required|string',
                 'payment_method' => 'required|string',
                 'payment_means' => 'required|string',

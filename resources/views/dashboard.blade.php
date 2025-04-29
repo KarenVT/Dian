@@ -8,7 +8,6 @@
     <div class="py-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div x-data="dashboardData()" x-init="fetchData(); setupPolling()">
-                <!-- Tarjetas principales con diseño optimizado -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
                     <!-- Tarjeta: Facturas hoy -->
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg transition-all duration-300 hover:shadow-md border border-gray-100">

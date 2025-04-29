@@ -45,8 +45,12 @@ class DianController extends Controller
             $result = $this->dianApiService->sendInvoice($invoice);
             
             if ($result['success']) {
+                // Verificar si la factura ha sido autorizada
+                $authorizationStatus = isset($result['status']) && strtoupper($result['status']) === 'AUTHORIZED';
+                $statusMessage = $authorizationStatus ? 'Factura autorizada por la DIAN.' : 'Factura enviada, pendiente de autorización.';
+                
                 return redirect()->back()
-                    ->with('success', 'Factura enviada correctamente a DIAN. ID de seguimiento: ' . ($result['trackId'] ?? 'No disponible'));
+                    ->with('success', 'Factura enviada correctamente a DIAN. ' . $statusMessage . ' ID de seguimiento: ' . ($result['trackId'] ?? 'No disponible'));
             }
             
             return redirect()->back()
@@ -106,7 +110,7 @@ class DianController extends Controller
         $validated = $request->validate([
             'invoices' => 'required|array|min:1',
             'invoices.*' => 'required|integer|exists:invoices,id',
-            'action' => 'required|string|in:consultar,enviar,almacenar,notificar,consultar-estado,generar-eventos,consultar-eventos,xml',
+            'action' => 'required|string|in:consultar,enviar,almacenar',
         ]);
         
         $results = [
@@ -127,12 +131,16 @@ class DianController extends Controller
                         if ($invoice->canBeSentToDian()) {
                             $actionResult = $this->dianApiService->sendInvoice($invoice);
                             if ($actionResult['success']) {
+                                // Verificar si la factura ha sido autorizada
+                                $authorizationStatus = isset($actionResult['status']) && strtoupper($actionResult['status']) === 'AUTHORIZED';
+                                $statusMessage = $authorizationStatus ? 'Autorizada por la DIAN.' : 'Enviada, pendiente de autorización.';
+                                
                                 $results['success']++;
                                 $results['processed'][] = [
                                     'id' => $invoice->id,
                                     'number' => $invoice->invoice_number,
                                     'status' => 'success',
-                                    'message' => 'Enviada correctamente. ID de seguimiento: ' . ($actionResult['trackId'] ?? 'No disponible')
+                                    'message' => 'Enviada correctamente. ' . $statusMessage . ' ID de seguimiento: ' . ($actionResult['trackId'] ?? 'No disponible')
                                 ];
                             } else {
                                 $results['failed']++;
@@ -155,7 +163,6 @@ class DianController extends Controller
                         break;
                         
                     case 'consultar':
-                    case 'consultar-estado':
                         if ($invoice->dian_response_code === 'trackId' && !empty($invoice->dian_response_message)) {
                             $actionResult = $this->dianApiService->checkInvoiceStatus($invoice);
                             if ($actionResult['success']) {
@@ -164,7 +171,7 @@ class DianController extends Controller
                                     'id' => $invoice->id,
                                     'number' => $invoice->invoice_number,
                                     'status' => 'success',
-                                    'message' => 'Estado: ' . ($actionResult['status'] ?? 'pendiente')
+                                    'message' => 'Estado en DIAN: ' . ($actionResult['status'] ?? 'pendiente') . ' - ' . ($actionResult['statusDescription'] ?? 'Sin descripción')
                                 ];
                             } else {
                                 $results['failed']++;
@@ -187,67 +194,27 @@ class DianController extends Controller
                         break;
                         
                     case 'almacenar':
-                        // Simulación de almacenamiento
-                        $results['success']++;
-                        $results['processed'][] = [
-                            'id' => $invoice->id,
-                            'number' => $invoice->invoice_number,
-                            'status' => 'success',
-                            'message' => 'Factura almacenada correctamente'
-                        ];
-                        break;
-                        
-                    case 'notificar':
-                        // Simulación de notificación
-                        $results['success']++;
-                        $results['processed'][] = [
-                            'id' => $invoice->id,
-                            'number' => $invoice->invoice_number,
-                            'status' => 'success',
-                            'message' => 'Notificación enviada correctamente'
-                        ];
-                        break;
-                        
-                    case 'generar-eventos':
-                        // Simulación de generación de eventos
-                        $results['success']++;
-                        $results['processed'][] = [
-                            'id' => $invoice->id,
-                            'number' => $invoice->invoice_number,
-                            'status' => 'success',
-                            'message' => 'Eventos generados correctamente'
-                        ];
-                        break;
-                        
-                    case 'consultar-eventos':
-                        // Simulación de consulta de eventos
-                        $results['success']++;
-                        $results['processed'][] = [
-                            'id' => $invoice->id,
-                            'number' => $invoice->invoice_number,
-                            'status' => 'success',
-                            'message' => 'No hay eventos registrados'
-                        ];
-                        break;
-                        
-                    case 'xml':
-                        // Verificar si tiene XML generado
-                        if ($invoice->xml_path) {
+                        // Almacenamiento local de la factura
+                        try {
+                            // Marcar la factura como almacenada localmente
+                            $invoice->update(['locally_stored' => true, 'stored_at' => now()]);
+                            
                             $results['success']++;
                             $results['processed'][] = [
                                 'id' => $invoice->id,
                                 'number' => $invoice->invoice_number,
                                 'status' => 'success',
-                                'message' => 'XML generado y disponible para descarga',
-                                'xmlUrl' => '/api/invoices/' . $invoice->id . '/xml'
+                                'message' => 'Factura almacenada exitosamente'
                             ];
-                        } else {
+                        } catch (\Exception $storageException) {
+                            Log::error("Error al almacenar factura #{$invoice->id}: " . $storageException->getMessage());
+                            
                             $results['failed']++;
                             $results['processed'][] = [
                                 'id' => $invoice->id,
                                 'number' => $invoice->invoice_number,
                                 'status' => 'error',
-                                'message' => 'No tiene XML generado'
+                                'message' => 'Error al almacenar: ' . $storageException->getMessage()
                             ];
                         }
                         break;

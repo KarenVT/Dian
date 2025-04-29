@@ -175,4 +175,19 @@ class CustomerController extends Controller
         return redirect()->route('customers.index')
             ->with('success', 'Cliente eliminado exitosamente.');
     }
+
+    /**
+     * Obtiene la lista de clientes para su uso en el formulario de facturas.
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getCustomersForInvoice()
+    {
+        $companyId = Auth::user()->company_id;
+        $customers = Customer::where('company_id', $companyId)
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name', 'document_type', 'document_number', 'phone', 'address']);
+        
+        return response()->json($customers);
+    }
 }

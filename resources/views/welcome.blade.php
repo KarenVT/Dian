@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
@@ -14,7 +13,6 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        
         <style>
             body {
                 font-family: 'Poppins', sans-serif;
@@ -64,7 +62,6 @@
                     <div class="flex items-center">
                         <img src="{{ asset('img/Logo Paychex.png') }}" alt="Paychex" class="h-10">
                     </div>
-                    
                     <!-- Navegación -->
                     <div class="hidden md:flex space-x-1">
             @if (Route::has('login'))
@@ -81,7 +78,6 @@
                 </div>
             @endif
                     </div>
-                    
                     <!-- Menú móvil -->
                     <div class="md:hidden">
                         <button type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none">

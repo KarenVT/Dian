@@ -43,6 +43,8 @@ class Invoice extends Model
         'dian_response_code',
         'dian_response_message',
         'dian_retry_count',
+        'locally_stored',
+        'stored_at',
     ];
 
     /**
@@ -59,6 +61,8 @@ class Invoice extends Model
         'dian_sent_at' => 'datetime',
         'dian_processed_at' => 'datetime',
         'dian_retry_count' => 'integer',
+        'locally_stored' => 'boolean',
+        'stored_at' => 'datetime',
     ];
 
     /**

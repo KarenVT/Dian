@@ -38,6 +38,29 @@
                         <!-- Sección del cliente -->
                         <div class="mb-8">
                             <h3 class="text-lg font-medium text-gray-800 mb-4">Información del Cliente</h3>
+                            
+                            <!-- Selector de cliente -->
+                            <div class="mb-4">
+                                <x-input-label for="customer_select" value="Seleccione un Cliente *" />
+                                <div class="relative">
+                                    <select 
+                                        id="customer_select" 
+                                        x-model="selectedCustomerId"
+                                        @change="selectCustomer()"
+                                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                    >
+                                        <option value="">Seleccione un cliente</option>
+                                        <template x-for="customer in customers" :key="customer.id">
+                                            <option :value="customer.id" x-text="customer.name + ' - ' + customer.document_type + ': ' + customer.document_number"></option>
+                                        </template>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                        <div x-show="customersLoading" class="animate-spin h-5 w-5 border-2 border-indigo-500 rounded-full border-t-transparent"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detalles del cliente -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <x-input-label for="document_type" value="Tipo de Documento *" />
@@ -62,23 +85,17 @@
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
+                                    <x-input-label for="name" value="Nombre *" />
+                                    <x-text-input id="name" type="text" x-model="formData.name" class="mt-1 block w-full" required />
+                                </div>
+                                <div>
                                     <x-input-label for="phone" value="Teléfono *" />
                                     <x-text-input id="phone" type="text" x-model="formData.phone" class="mt-1 block w-full" required />
                                 </div>
-                                <div>
-                                    <x-input-label for="address" value="Dirección *" />
-                                    <x-text-input id="address" type="text" x-model="formData.address" class="mt-1 block w-full" required />
-                                </div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input-label for="city" value="Ciudad *" />
-                                    <x-text-input id="city" type="text" x-model="formData.city" class="mt-1 block w-full" required />
-                                </div>
-                                <div>
-                                    <x-input-label for="state" value="Departamento *" />
-                                    <x-text-input id="state" type="text" x-model="formData.state" class="mt-1 block w-full" required />
-                                </div>
+                            <div>
+                                <x-input-label for="address" value="Dirección *" />
+                                <x-text-input id="address" type="text" x-model="formData.address" class="mt-1 block w-full" required />
                             </div>
                         </div>
 
@@ -230,8 +247,11 @@
             return {
                 loading: false,
                 productsLoading: false,
+                customersLoading: false,
                 products: [],
+                customers: [],
                 selectedProductId: '',
+                selectedCustomerId: '',
                 formData: {
                     document_type: 'CC',
                     document_number: '',
@@ -239,8 +259,6 @@
                     email: '',
                     phone: '',
                     address: '',
-                    city: '',
-                    state: '',
                     customer_country: 'CO',
                     payment_method: '1', // Efectivo por defecto
                     payment_means: '10', // Efectivo por defecto
@@ -266,6 +284,7 @@
                 
                 initialize() {
                     this.fetchProducts();
+                    this.fetchCustomers();
                     
                     // Asignar fecha de vencimiento predeterminada (hoy + 30 días)
                     const defaultDueDate = new Date();
@@ -332,6 +351,61 @@
                         alert(`Error al cargar productos: ${error.message}. Por favor, recargue la página o contacte a soporte.`);
                     } finally {
                         this.productsLoading = false;
+                    }
+                },
+                
+                async fetchCustomers() {
+                    this.customersLoading = true;
+                    
+                    try {
+                        console.log('Iniciando carga de clientes...');
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        console.log('CSRF Token obtenido:', csrfToken ? 'Sí' : 'No');
+                        
+                        // Usamos una ruta web regular en vez de la API
+                        const response = await fetch('/obtener-clientes-para-factura', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken
+                            },
+                            credentials: 'include' // Importante para mantener la sesión
+                        });
+                        
+                        console.log('Respuesta recibida:', response.status, response.statusText);
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Error en respuesta:', errorText);
+                            throw new Error(`Error al cargar clientes: ${response.status} ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('Datos recibidos:', data);
+                        
+                        if (!Array.isArray(data)) {
+                            console.error('Formato incorrecto:', data);
+                            throw new Error('Formato de respuesta inválido');
+                        }
+                        
+                        if (data.length === 0) {
+                            console.log('No se encontraron clientes');
+                            alert('No hay clientes disponibles. Por favor, cree algunos clientes primero.');
+                            this.customers = [];
+                            return;
+                        }
+                        
+                        this.customers = data.map(customer => ({
+                            ...customer,
+                            displayName: `${customer.name} - ${customer.document_type}: ${customer.document_number}`
+                        }));
+                        
+                        console.log('Clientes procesados:', this.customers.length);
+                    } catch (error) {
+                        console.error('Error al cargar clientes:', error);
+                        alert(`Error al cargar clientes: ${error.message}. Por favor, recargue la página o contacte a soporte.`);
+                    } finally {
+                        this.customersLoading = false;
                     }
                 },
                 
@@ -414,8 +488,8 @@
                         return false;
                     }
                     
-                    if (!this.formData.address || !this.formData.city || !this.formData.state) {
-                        alert('La dirección completa del cliente (dirección, ciudad y departamento) es obligatoria para la facturación electrónica DIAN.');
+                    if (!this.formData.address) {
+                        alert('La dirección del cliente es obligatoria para la facturación electrónica DIAN.');
                         return false;
                     }
                     
@@ -467,6 +541,32 @@
                     } finally {
                         this.loading = false;
                     }
+                },
+                
+                selectCustomer() {
+                    if (this.selectedCustomerId) {
+                        const customer = this.customers.find(c => c.id === parseInt(this.selectedCustomerId));
+                        if (customer) {
+                            this.formData.document_type = customer.document_type;
+                            this.formData.document_number = customer.document_number;
+                            this.formData.name = customer.name;
+                            this.formData.phone = customer.phone;
+                            this.formData.address = customer.address;
+                        } else {
+                            console.error('Cliente no encontrado en la lista');
+                            this.resetCustomerFields();
+                        }
+                    } else {
+                        this.resetCustomerFields();
+                    }
+                },
+                
+                resetCustomerFields() {
+                    this.formData.document_type = 'CC';
+                    this.formData.document_number = '';
+                    this.formData.name = '';
+                    this.formData.phone = '';
+                    this.formData.address = '';
                 }
             };
         }

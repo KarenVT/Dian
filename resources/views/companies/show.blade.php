@@ -32,7 +32,7 @@
                                 <p><span class="font-semibold">Dirección:</span> {{ $company->address ?? 'No especificada' }}</p>
                             </div>
                         </div>
-                        
+
                         <div>
                             <h3 class="text-lg font-semibold mb-2">Estadísticas</h3>
                             <div class="bg-gray-50 p-4 rounded">
@@ -45,5 +45,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>show
 </x-app-layout> 

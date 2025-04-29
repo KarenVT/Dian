@@ -65,6 +65,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Ruta especial para obtener productos en el formulario de facturas
     Route::get('/obtener-productos-para-factura', [ProductController::class, 'getProductsForInvoice'])->name('products.for-invoice');
     
+    // Ruta especial para obtener clientes en el formulario de facturas
+    Route::get('/obtener-clientes-para-factura', [CustomerController::class, 'getCustomersForInvoice'])->name('customers.for-invoice');
+    
     // Ruta para generar facturas desde el formulario web
     Route::post('/generar-factura', [InvoiceController::class, 'generateInvoice'])->name('invoices.generate');
     
@@ -79,7 +82,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Facturas
     Route::middleware('can:view_invoice')->group(function () {
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-        Route::get('/invoices/search', [InvoiceController::class, 'search'])->name('invoices.search');
         Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::put('/invoices/{invoice}/resend', [InvoiceController::class, 'resend'])->name('invoices.resend');
